@@ -1,0 +1,27 @@
+-- 实验室预约表
+CREATE TABLE IF NOT EXISTS lab_reservation (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '预约记录ID',
+  lab_id BIGINT NOT NULL COMMENT '实验室ID',
+  lab_name VARCHAR(100) COMMENT '实验室名称(冗余快照)',
+  user_id BIGINT NOT NULL COMMENT '预约人ID',
+  username VARCHAR(50) COMMENT '预约人用户名(冗余快照)',
+  user_role VARCHAR(20) COMMENT '预约人角色',
+  purpose VARCHAR(500) COMMENT '预约用途',
+  reserve_date DATE NOT NULL COMMENT '预约日期',
+  end_date DATE COMMENT '结束日期(多日预约)',
+  start_time VARCHAR(10) COMMENT '开始时间 HH:mm',
+  end_time VARCHAR(10) COMMENT '结束时间 HH:mm',
+  status TINYINT DEFAULT 0 COMMENT '状态: 0待审核 1已通过 2已拒绝 3已取消',
+  approver_name VARCHAR(50) COMMENT '审核人姓名(冗余快照)',
+  approve_time DATETIME COMMENT '审核时间',
+  approve_remark VARCHAR(500) COMMENT '审核意见',
+  create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  deleted TINYINT DEFAULT 0 COMMENT '逻辑删除: 0正常 1已删除',
+  INDEX idx_lab_id (lab_id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_status (status),
+  INDEX idx_reserve_date (reserve_date),
+  CONSTRAINT fk_res_lab FOREIGN KEY (lab_id) REFERENCES lab(id),
+  CONSTRAINT fk_res_user FOREIGN KEY (user_id) REFERENCES user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='实验室预约';
