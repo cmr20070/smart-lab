@@ -1,11 +1,25 @@
 ﻿import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
+import { isPagesEnv, matchMock } from '@/mock'
 
 const request = axios.create({
   baseURL: '/api',
   timeout: 15000,
 })
+
+if (isPagesEnv()) {
+  request.interceptors.request.use(
+    (config) => {
+      const handler = matchMock(config.method?.toUpperCase(), config.url)
+      const mockData = handler
+        ? handler(config.data ? JSON.parse(config.data) : config.params)
+        : { code: 200, message: 'ok', data: null }
+      return Promise.reject({ __mock: true, mockData })
+    },
+    (error) => Promise.reject(error)
+  )
+}
 
 request.interceptors.request.use(
   (config) => {
@@ -46,6 +60,14 @@ request.interceptors.response.use(
     return res
   },
   (error) => {
+    if (error.__mock) {
+      const res = error.mockData
+      if (res.code !== 200) {
+        ElMessage.error(res.message || '请求失败')
+        return Promise.reject(new Error(res.message || '请求失败'))
+      }
+      return res
+    }
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('userInfo')
