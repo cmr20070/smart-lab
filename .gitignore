@@ -44,6 +44,10 @@ dist/
 # Uploads
 uploads/
 
+# Documents
+*.docx
+*.doc
+
 # Temp files
 ~$*
 
